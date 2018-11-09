@@ -441,9 +441,9 @@ class ConvolutionalLayer(LayerWithParameters):
         output_height = input_height - kernel_height + 1
         output_width = input_width - kernel_width + 1
     """
-    
+
     import numpy as np
-   
+
     def __init__(self, num_input_channels, num_output_channels,
                  input_height, input_width,
                  kernel_height, kernel_width,
@@ -507,22 +507,22 @@ class ConvolutionalLayer(LayerWithParameters):
         padding = 0
         stride = 1
         N, C, H, W = inputs.shape
-        
+
         out_height = int((H + 2 * padding - self.kernel_height) / stride + 1)
         out_width = int((W + 2 * padding - self.kernel_width) / stride + 1)
-  
+
         X_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
         W_col = self.kernels.reshape(self.num_output_channels, -1)
-        
-        
-        out = np.dot(W_col,X_col) + self.biases.reshape(-1,1) - 54
-      
-        out = out.reshape(self.num_output_channels, out_height, out_width, N)
-        
-        return out.transpose(3, 0, 1, 2)
 
-       
-    
+
+        out = np.dot(W_col,X_col) + self.biases.reshape(-1,1) - 54 #Ask at ML-base, what could be causing this error.
+
+        out = out.reshape(self.num_output_channels, out_height, out_width, N)
+        out = out.transpose(3,0,1,2)
+        return
+
+
+
 
     def bprop(self, inputs, outputs, grads_wrt_outputs):
         """Back propagates gradients through a layer.
@@ -552,7 +552,6 @@ class ConvolutionalLayer(LayerWithParameters):
         dX_col = kernel_reshape.T @ outputs_reshaped
         dX = col2im_indices(dX_col, inputs.shape, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
 
-        
         return dX
 
     def grads_wrt_params(self, inputs, grads_wrt_outputs):
@@ -569,16 +568,16 @@ class ConvolutionalLayer(LayerWithParameters):
         padding = 0
         stride = 1
 
-        
+
         db = np.sum(outputs, axis=(0))
         db = db.reshape(self.num_output_channels, -1)
 
         X_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
         outputs_reshaped = outputs.transpose(1, 2, 3, 0).reshape(self.num_output_channels, -1)
-        
+
         dW = outputs_reshaped @ X_col.T
         dW = dW.reshape(self.kernels_shape)
-        
+
         return [dW, db]
 
     def params_penalty(self):
@@ -639,13 +638,13 @@ class MaxPooling2DLayer(Layer):
         :param inputs: Inputs of size (b, c, input_height, input_width)
         :return: The output of the max pooling operation. Assuming a stride=2 the output should have a shape of
         (b, c, (input_height - size)/stride + 1, (input_width - size)/stride + 1)"""
-        
+
         padding = 0
         N, C, H, W = inputs.shape
-        
+
         out_height = int((H - self.size) / self.stride + 1)
         out_width = int((W - self.size) / self.stride + 1)
-        
+
 
         X_col = im2col_indices(inputs, self.size, self.size, padding=padding, stride=self.stride)
 
@@ -659,8 +658,8 @@ class MaxPooling2DLayer(Layer):
         out = out.transpose(2, 3, 0, 1)
 
         return out
-    
-    
+
+
     def bprop(self, inputs, outputs, grads_wrt_outputs):
         """
         Given the inputs, outputs and grads_wrt_outputs of the max pooling layer, compute the grads_wrt_inputs
@@ -672,10 +671,10 @@ class MaxPooling2DLayer(Layer):
         """
         padding = 0
         N, C, H, W = inputs.shape
-        
+
         out_height = int((H + 2 * padding - self.size) / self.stride + 1)
         out_width = int((W + 2 * padding - self.size) / self.stride + 1)
-        
+
         X_col = im2col_indices(inputs_reshaped, self.size, self.size, padding=padding, stride=self.stride)
 
         # 4x9800, as in the forward step
@@ -697,7 +696,7 @@ class MaxPooling2DLayer(Layer):
 
         # Reshape back to match the input dimension: 5x10x28x28
         dX = dX.reshape(X.shape)
-        
+
         return dX
 
 
@@ -1004,6 +1003,3 @@ class ReshapeLayer(Layer):
 
     def __repr__(self):
         return 'ReshapeLayer(output_shape={0})'.format(self.output_shape)
-
-    
-
