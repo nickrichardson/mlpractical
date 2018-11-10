@@ -16,58 +16,56 @@ import numpy as np
 import mlp.initialisers as init
 from mlp import DEFAULT_SEED
 
-def get_im2col_indices(x_shape, field_height, field_width, padding=0, stride=1):
+
+
+def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
     # First figure out what the size of the output should be
     N, C, H, W = x_shape
     assert (H + 2 * padding - field_height) % stride == 0
-    assert (W + 2 * padding - field_width) % stride == 0
-    out_height = int(H + 2 * padding - field_height / stride + 1)
-    out_width = int(W + 2 * padding - field_width / stride + 1)
+    assert (W + 2 * padding - field_height) % stride == 0
+    out_height = int((H + 2 * padding - field_height) / stride + 1)
+    out_width = int((W + 2 * padding - field_width) / stride + 1)
 
     i0 = np.repeat(np.arange(field_height), field_width)
     i0 = np.tile(i0, C)
     i1 = stride * np.repeat(np.arange(out_height), out_width)
     j0 = np.tile(np.arange(field_width), field_height * C)
     j1 = stride * np.tile(np.arange(out_width), out_height)
-
     i = i0.reshape(-1, 1) + i1.reshape(1, -1)
     j = j0.reshape(-1, 1) + j1.reshape(1, -1)
 
     k = np.repeat(np.arange(C), field_height * field_width).reshape(-1, 1)
 
-    return (k, i, j)
+    return (k.astype(int), i.astype(int), j.astype(int))
 
 
-def im2col_indices(x, field_height, field_width, padding=0, stride=1):
+def im2col_indices(x, field_height, field_width, padding=1, stride=1):
     """ An implementation of im2col based on some fancy indexing """
-
     # Zero-pad the input
     p = padding
     x_padded = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), mode='constant')
 
     k, i, j = get_im2col_indices(x.shape, field_height, field_width, padding, stride)
+
     cols = x_padded[:, k, i, j]
     C = x.shape[1]
     cols = cols.transpose(1, 2, 0).reshape(field_height * field_width * C, -1)
     return cols
 
 
-def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=0,
+def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=1,
                    stride=1):
     """ An implementation of col2im based on fancy indexing and np.add.at """
     N, C, H, W = x_shape
     H_padded, W_padded = H + 2 * padding, W + 2 * padding
     x_padded = np.zeros((N, C, H_padded, W_padded), dtype=cols.dtype)
-    k, i, j = get_im2col_indices(x_shape, field_height, field_width, padding,
-                                stride)
+    k, i, j = get_im2col_indices(x_shape, field_height, field_width, padding, stride)
     cols_reshaped = cols.reshape(C * field_height * field_width, -1, N)
     cols_reshaped = cols_reshaped.transpose(2, 0, 1)
     np.add.at(x_padded, (slice(None), k, i, j), cols_reshaped)
     if padding == 0:
         return x_padded
     return x_padded[:, :, padding:-padding, padding:-padding]
-
-    pass
 
 
 
@@ -515,11 +513,11 @@ class ConvolutionalLayer(LayerWithParameters):
         W_col = self.kernels.reshape(self.num_output_channels, -1)
 
 
-        out = np.dot(W_col,X_col) + self.biases.reshape(-1,1) - 54 #Ask at ML-base, what could be causing this error.
+        out = np.dot(W_col,X_col) + self.biases.reshape(-1,1)
 
         out = out.reshape(self.num_output_channels, out_height, out_width, N)
         out = out.transpose(3,0,1,2)
-        return
+        return out
 
 
 
@@ -544,14 +542,15 @@ class ConvolutionalLayer(LayerWithParameters):
         padding = 0
         stride = 1
 
-        outputs_reshaped = outputs.transpose(1, 2, 3, 0).reshape(self.num_output_channels, -1)
+        grads_wrt_outputs_reshaped = grads_wrt_outputs.transpose(1, 2, 3, 0).reshape(self.num_output_channels, -1)
         X_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
 
 
         kernel_reshape = self.kernels.reshape(self.num_output_channels, -1)
-        dX_col = kernel_reshape.T @ outputs_reshaped
-        dX = col2im_indices(dX_col, inputs.shape, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
 
+        dX_col = kernel_reshape.T @ grads_wrt_outputs_reshaped
+
+        dX = col2im_indices(dX_col, inputs.shape, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
         return dX
 
     def grads_wrt_params(self, inputs, grads_wrt_outputs):
@@ -569,13 +568,13 @@ class ConvolutionalLayer(LayerWithParameters):
         stride = 1
 
 
-        db = np.sum(outputs, axis=(0))
-        db = db.reshape(self.num_output_channels, -1)
+        db = np.sum(grads_wrt_outputs, axis=(0, 2, 3))
+        db = db.reshape(self.num_output_channels, )
 
         X_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding=padding, stride=stride)
-        outputs_reshaped = outputs.transpose(1, 2, 3, 0).reshape(self.num_output_channels, -1)
+        grads_wrt_outputs_reshaped = grads_wrt_outputs.transpose(1, 2, 3, 0).reshape(self.num_output_channels, -1)
 
-        dW = outputs_reshaped @ X_col.T
+        dW =  grads_wrt_outputs_reshaped @ X_col.T
         dW = dW.reshape(self.kernels_shape)
 
         return [dW, db]
@@ -645,8 +644,9 @@ class MaxPooling2DLayer(Layer):
         out_height = int((H - self.size) / self.stride + 1)
         out_width = int((W - self.size) / self.stride + 1)
 
+        inputs_reshaped = inputs.reshape(N*C, 1, H, W)
 
-        X_col = im2col_indices(inputs, self.size, self.size, padding=padding, stride=self.stride)
+        X_col = im2col_indices(inputs_reshaped, self.size, self.size, padding=padding, stride=self.stride)
 
         max_idx = np.argmax(X_col, axis=0)
 
@@ -672,30 +672,21 @@ class MaxPooling2DLayer(Layer):
         padding = 0
         N, C, H, W = inputs.shape
 
-        out_height = int((H + 2 * padding - self.size) / self.stride + 1)
-        out_width = int((W + 2 * padding - self.size) / self.stride + 1)
+        out_height = int((H  - self.size) / self.stride + 1)
+        out_width = int((W  - self.size) / self.stride + 1)
 
+        inputs_reshaped = inputs.reshape(N*C, 1, H, W)
         X_col = im2col_indices(inputs_reshaped, self.size, self.size, padding=padding, stride=self.stride)
 
-        # 4x9800, as in the forward step
         dX_col = np.zeros_like(X_col)
 
-        # 5x10x14x14 => 14x14x5x10, then flattened to 1x9800
-        # Transpose step is necessary to get the correct arrangement
-        outputs_flat = outputs.transpose(2, 3, 0, 1).ravel()
+        grads_wrt_outputs_reshaped = grads_wrt_outputs.transpose(2, 3, 0, 1).ravel()
 
-        # Fill the maximum index of each column with the gradient
+        dX_col[np.argmax(X_col, axis=0), range(X_col.shape[1])] = grads_wrt_outputs_reshaped
 
-        # Essentially putting each of the 9800 grads
-        # to one of the 4 row in 9800 locations, one at each column
-        dX_col[max_idx, range(max_idx.size)] = outputs_flat
-
-        # We now have the stretched matrix of 4x9800, then undo it with col2im operation
-        # dX would be 50x1x28x28
         dX = col2im_indices(dX_col, (N * C, 1, H, W), self.size, self.size, padding=padding, stride=self.stride)
 
-        # Reshape back to match the input dimension: 5x10x28x28
-        dX = dX.reshape(X.shape)
+        dX = dX.reshape(inputs.shape)
 
         return dX
 
