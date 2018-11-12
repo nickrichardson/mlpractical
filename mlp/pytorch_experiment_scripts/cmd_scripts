@@ -1,0 +1,55 @@
+Welcome to the MLP course's Pytorch training and inference helper script
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --batch_size [BATCH_SIZE]
+                        Batch_size for experiment
+  --continue_from_epoch [CONTINUE_FROM_EPOCH]
+                        Batch_size for experiment
+  --seed [SEED]         Seed to use for random number generator for experiment
+  --image_num_channels [IMAGE_NUM_CHANNELS]
+                        The channel dimensionality of our image-data
+  --image_height [IMAGE_HEIGHT]
+                        Height of image data
+  --image_width [IMAGE_WIDTH]
+                        Width of image data
+  --dim_reduction_type [DIM_REDUCTION_TYPE]
+                        One of [strided_convolution, dilated_convolution,
+                        max_pooling, avg_pooling]
+  --num_layers [NUM_LAYERS]
+                        Number of convolutional layers in the network
+                        (excluding dimensionality reduction layers)
+  --num_filters [NUM_FILTERS]
+                        Number of convolutional filters per convolutional
+                        layer in the network (excluding dimensionality
+                        reduction layers)
+  --num_epochs [NUM_EPOCHS]
+                        The experiment's epoch budget
+  --experiment_name [EXPERIMENT_NAME]
+                        Experiment name - to be used for building the
+                        experiment folder
+  --use_gpu [USE_GPU]   A flag indicating whether we will use GPU acceleration
+                        or not (defaults to CPU)
+  --weight_decay_coefficient [WEIGHT_DECAY_COEFFICIENT]
+                        Weight decay to use for Adam
+
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_filters 32 --dim_reduction_type max_pooling --experiment_name results/max_pooling_defaults --use_gpu True
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_filters 32 --dim_reduction_type strided_convolutoin --experiment_name results/strided_defaults --use_gpu True
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_filters 32 --dim_reduction_type dilated_convolution --experiment_name results/dilated_defaults --use_gpu True
+
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 32 --dim_reduction_type max_pooling --experiment_name results/max_pooling_10_32 --use_gpu True
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 32 --dim_reduction_type strided_convolutoin --experiment_name results/strided_10_32 --use_gpu True
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 32 --dim_reduction_type dilated_convolution --experiment_name results/dilated_10_32 --use_gpu True
+
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 64 --dim_reduction_type max_pooling --experiment_name results/max_pooling_10_64 --use_gpu True
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 64 --dim_reduction_type strided_convolutoin --experiment_name results/strided_10_64 --use_gpu True
+
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 64 --dim_reduction_type dilated_convolution --experiment_name results/dilated_10_64 --use_gpu True
