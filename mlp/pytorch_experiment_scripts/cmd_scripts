@@ -40,6 +40,8 @@ python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_syste
 
 python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_filters 32 --dim_reduction_type dilated_convolution --experiment_name results/dilated_defaults --use_gpu True
 
+python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_filters 32 --dim_reduction_type avg_pooling --experiment_name results/avg_pooling_defaults --use_gpu True
+
 
 python mlp/pytorch_experiment_scripts/train_evaluate_emnist_classification_system.py --batch_size 100 --seed 0 --num_epochs 10 --num_filters 32 --dim_reduction_type max_pooling --experiment_name results/max_pooling_10_32 --use_gpu True
 
