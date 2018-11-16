@@ -118,15 +118,15 @@ class ConvolutionalNetwork(nn.Module):
         out = x
         # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
         for i in range(self.num_layers):  # for number of layers times
-            self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
-                                                             # add a conv layer in the module dict
-                                                             kernel_size=3,
-                                                             out_channels=self.num_filters, padding=1,
-                                                             bias=self.use_bias)
-
-            out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
-            out = F.relu(out)  # apply relu
-            print(out.shape)
+            # self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+            #                                                  # add a conv layer in the module dict
+            #                                                  kernel_size=3,
+            #                                                  out_channels=self.num_filters, padding=1,
+            #                                                  bias=self.use_bias)
+            #
+            # out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
+            # out = F.relu(out)  # apply relu
+            #print(out.shape)
             if self.dim_reduction_type == 'strided_convolution':  # if dim reduction is strided conv, then add a strided conv
                 self.layer_dict['dim_reduction_strided_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
                                                                                        kernel_size=3,
