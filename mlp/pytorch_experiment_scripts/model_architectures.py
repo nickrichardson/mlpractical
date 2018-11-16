@@ -181,20 +181,20 @@ class ConvolutionalNetwork(nn.Module):
 
             out = self.layer_dict['conv_{}'.format(i)](out)  # pass through conv layer indexed at i
             out = F.relu(out)  # pass conv outputs through ReLU
-            if self.dim_reduction_type == 'strided_convolution':  # if strided convolution dim reduction then
-                out = self.layer_dict['dim_reduction_strided_conv_{}'.format(i)](
-                    out)  # pass previous outputs through a strided convolution indexed i
-                out = F.relu(out)  # pass strided conv outputs through ReLU
-
-            elif self.dim_reduction_type == 'dilated_convolution':
-                out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](out)
-                out = F.relu(out)
-
-            elif self.dim_reduction_type == 'max_pooling':
-                out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
-
-            elif self.dim_reduction_type == 'avg_pooling':
-                out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+            # if self.dim_reduction_type == 'strided_convolution':  # if strided convolution dim reduction then
+            #     out = self.layer_dict['dim_reduction_strided_conv_{}'.format(i)](
+            #         out)  # pass previous outputs through a strided convolution indexed i
+            #     out = F.relu(out)  # pass strided conv outputs through ReLU
+            #
+            # elif self.dim_reduction_type == 'dilated_convolution':
+            #     out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](out)
+            #     out = F.relu(out)
+            #
+            # elif self.dim_reduction_type == 'max_pooling':
+            #     out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
+            #
+            # elif self.dim_reduction_type == 'avg_pooling':
+            #     out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
 
         if out.shape[-1] != 2:
             out = F.adaptive_avg_pool2d(out, 2)
