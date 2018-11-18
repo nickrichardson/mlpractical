@@ -139,7 +139,7 @@ class ConvolutionalNetwork(nn.Module):
                 self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
                 print(out.shape)
-            elif switch == 1:
+            else:
                 switch += 1
                 self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
