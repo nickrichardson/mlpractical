@@ -85,7 +85,7 @@ class FCCNetwork(nn.Module):
 
 
 class ConvolutionalNetwork(nn.Module):
-    def __init__(self, input_shape, dim_reduction_type, num_output_classes, num_filters, num_layers, use_bias=False):
+    def __init__(self, input_shape, dim_reduction_type, num_output_classes, num_filters, num_layers, dilation, stride, use_bias=False):
         """
         Initializes a convolutional network module object.
         :param input_shape: The shape of the inputs going in to the network.
@@ -102,6 +102,8 @@ class ConvolutionalNetwork(nn.Module):
         self.num_output_classes = num_output_classes
         self.use_bias = use_bias
         self.num_layers = num_layers
+        self.dilation = dilation
+        self.stride = stride
         self.dim_reduction_type = dim_reduction_type
         # initialize a module dict, which is effectively a dictionary that can collect layers and integrate them into pytorch
         self.layer_dict = nn.ModuleDict()
@@ -122,7 +124,8 @@ class ConvolutionalNetwork(nn.Module):
                                                              # add a conv layer in the module dict
                                                              kernel_size=3,
                                                              out_channels=self.num_filters, padding=1,
-                                                             bias=self.use_bias)
+                                                             bias=self.use_bias, stide=self.stride,
+                                                             dilation = self.dilation)
 
             out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
             out = F.relu(out)  # apply relu

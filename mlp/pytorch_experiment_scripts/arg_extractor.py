@@ -35,6 +35,10 @@ def get_args():
     parser.add_argument('--num_epochs', nargs="?", type=int, default=100, help='The experiment\'s epoch budget')
     parser.add_argument('--experiment_name', nargs="?", type=str, default="exp_1",
                         help='Experiment name - to be used for building the experiment folder')
+                        
+    parser.add_argument('--dilation', nargs="?", type=int, default=0, help='The experiment\'s dilation')
+    parser.add_argument('--stride', nargs="?", type=int, default=1, help='The experiment\'s stride')
+
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,
                         help='A flag indicating whether we will use GPU acceleration or not')
     parser.add_argument('--weight_decay_coefficient', nargs="?", type=float, default=1e-05,
