@@ -124,22 +124,22 @@ class ConvolutionalNetwork(nn.Module):
 
         # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
         for i in range(self.num_layers):  # for number of layers times
-            # self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
-            #                                                  # add a conv layer in the module dict
-            #                                                  kernel_size=3,
-            #                                                  out_channels=self.num_filters, padding=1,
-            #                                                  bias=self.use_bias)
-            #
-            # out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
-            # out = F.relu(out)  # apply relu
-            # print(out.shape)
+            self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+                                                             # add a conv layer in the module dict
+                                                             kernel_size=3,
+                                                             out_channels=self.num_filters, padding=1,
+                                                             bias=self.use_bias)
+
+            out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
+            out = F.relu(out)  # apply relu
+            print(out.shape)
 
             if switch % 2 == 0:
                 switch += 1
                 self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
                 print(out.shape)
-            else:
+            elif switch == 1:
                 switch += 1
                 self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
