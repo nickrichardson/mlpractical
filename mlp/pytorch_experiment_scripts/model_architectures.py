@@ -138,11 +138,12 @@ class ConvolutionalNetwork(nn.Module):
                 switch += 1
                 self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+                print(out.shape)
             else:
                 switch += 1
                 self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
-
+                print(out.shape)
 
             # out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
             # out = F.relu(out)  # apply relu
