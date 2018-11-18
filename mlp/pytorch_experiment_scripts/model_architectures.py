@@ -124,7 +124,7 @@ class ConvolutionalNetwork(nn.Module):
                                                              # add a conv layer in the module dict
                                                              kernel_size=3,
                                                              out_channels=self.num_filters, padding=1,
-                                                             bias=self.use_bias, stide=self.stride,
+                                                             bias=self.use_bias, stride=self.stride,
                                                              dilation = self.dilation)
 
             out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
