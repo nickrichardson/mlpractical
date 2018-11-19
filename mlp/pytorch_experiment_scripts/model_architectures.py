@@ -137,7 +137,7 @@ class ConvolutionalNetwork(nn.Module):
                                                              kernel_size=3,
                                                              out_channels=self.num_filters, padding=2,
                                                              bias=self.use_bias,
-                                                                 dilation = 4 - abs(- 2 + i))
+                                                             dilation = 3 - abs(- 2 + i))
 
             out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
             out = F.relu(out)  # apply relu
