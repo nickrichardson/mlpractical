@@ -123,7 +123,7 @@ class ConvolutionalNetwork(nn.Module):
             self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
                                                              # add a conv layer in the module dict
                                                              kernel_size=3,
-                                                             out_channels=self.num_filters, padding=5,
+                                                             out_channels=self.num_filters, padding=3,
                                                              bias=self.use_bias, stride = self.stride,
                                                              dilation = self.dilation + i*2)
 
