@@ -192,6 +192,9 @@ class ExperimentBuilder(nn.Module):
             epoch_elapsed_time = time.time() - epoch_start_time  # calculate time taken for epoch
             epoch_elapsed_time = "{:.4f}".format(epoch_elapsed_time)
             print("Epoch {}:".format(epoch_idx), out_string, "epoch time", epoch_elapsed_time, "seconds")
+            FILENAME = self.experiment_logs + '/time.txt'
+            with open(FILENAME, 'a') as f:
+            	print(epoch_elapsed_time, file=f)
             self.save_model(model_save_dir=self.experiment_saved_models,
                             # save model and best val idx and best val acc, using the model dir, model name and model idx
                             model_save_name="train_model", model_idx=epoch_idx,
