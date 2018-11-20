@@ -118,33 +118,36 @@ class ConvolutionalNetwork(nn.Module):
         x = torch.zeros((self.input_shape))  # create dummy inputs to be used to infer shapes of layers
 
         out = x
+
+        #Set up a switch
+        switch = 0
+
         # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
         for i in range(self.num_layers):  # for number of layers times
-            # self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
-            #                                                  # add a conv layer in the module dict
-            #                                                  kernel_size=3,
-            #                                                  out_channels=self.num_filters, padding=2,
-            #                                                  bias=self.use_bias,
-            #                                                  dilation = self.dilation + i)
-            #
-            # out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
-            # out = F.relu(out)  # apply relu
-            # print(out.shape)
-
-
             self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
                                                              # add a conv layer in the module dict
                                                              kernel_size=3,
-                                                             out_channels=self.num_filters, padding=2,
-                                                             bias=self.use_bias,
-                                                             dilation = 3 - abs(- 2 + i))
+                                                             out_channels=self.num_filters, padding=1,
+                                                             bias=self.use_bias)
 
             out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
             out = F.relu(out)  # apply relu
             print(out.shape)
 
+            if switch == 3:
+                switch += 1
+                self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
+                out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+                print(out.shape)
+            else:
+                switch += 1
+                self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
+                out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
+                print(out.shape)
 
-
+            # out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
+            # out = F.relu(out)  # apply relu
+            # print(out.shape)
             # if self.dim_reduction_type == 'strided_convolution':  # if dim reduction is strided conv, then add a strided conv
             #     self.layer_dict['dim_reduction_strided_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
             #                                                                            kernel_size=3,
