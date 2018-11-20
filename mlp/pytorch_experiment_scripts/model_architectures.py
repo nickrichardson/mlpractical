@@ -134,7 +134,7 @@ class ConvolutionalNetwork(nn.Module):
             out = F.relu(out)  # apply relu
             print(out.shape)
 
-            if switch != 0:
+            if switch == 2 or switch == 3:
                 switch += 1
                 self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
