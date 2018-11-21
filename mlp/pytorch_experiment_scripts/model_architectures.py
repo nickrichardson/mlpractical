@@ -134,7 +134,7 @@ class ConvolutionalNetwork(nn.Module):
             out = F.relu(out)  # apply relu
             print(out.shape)
 
-            if switch == 3:
+            if switch == 2 or switch == 3:
                 switch += 1
                 self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
