@@ -120,47 +120,73 @@ class ConvolutionalNetwork(nn.Module):
         out = x
         # torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
         for i in range(self.num_layers):  # for number of layers times
-            self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
-                                                             # add a conv layer in the module dict
-                                                             kernel_size=3,
-                                                             out_channels=self.num_filters, padding=1,
-                                                             bias=self.use_bias)
+            # self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+            #                                                  # add a conv layer in the module dict
+            #                                                  kernel_size=3,
+            #                                                  out_channels=self.num_filters, padding=2,
+            #                                                  bias=self.use_bias,
+            #                                                  dilation = self.dilation + i)
+            #
+            # out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
+            # out = F.relu(out)  # apply relu
+            # print(out.shape)
 
-            out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
-            out = F.relu(out)  # apply relu
-            print(out.shape)
-            print("ttt")
-            if self.dim_reduction_type == 'strided_convolution':  # if dim reduction is strided conv, then add a strided conv
-                self.layer_dict['dim_reduction_strided_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
-                                                                                       kernel_size=3,
-                                                                                       out_channels=out.shape[1],
-                                                                                       padding=1,
-                                                                                       bias=self.use_bias, stride=2,
-                                                                                       dilation=1)
+            if i == (self.num_layers - 1):
+                self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+                                                                 # add a conv layer in the module dict
+                                                                 kernel_size=2,
+                                                                 out_channels=self.num_filters, padding=1,
+                                                                 bias=self.use_bias,
+                                                                 dilation = 3)
 
-                out = self.layer_dict['dim_reduction_strided_conv_{}'.format(i)](
-                    out)  # use strided conv to get an output
-                out = F.relu(out)  # apply relu to the output
-            elif self.dim_reduction_type == 'dilated_convolution':  # if dim reduction is dilated conv, then add a dilated conv, using an arbitrary dilation rate of i + 2 (so it gets smaller as we go, you can choose other dilation rates should you wish to do it.)
-                self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
-                                                                                       kernel_size=3,
-                                                                                       out_channels=out.shape[1],
-                                                                                       padding=1,
-                                                                                       bias=self.use_bias, stride=1,
-                                                                                       dilation=i + 2)
-                out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](
-                    out)  # run dilated conv on input to get output
-                out = F.relu(out)  # apply relu on output
+                out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
+                out = F.relu(out)  # apply relu
+                print(out.shape)
+            else:
+                self.layer_dict['conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+                                                                 # add a conv layer in the module dict
+                                                                 kernel_size=2,
+                                                                 out_channels=self.num_filters, padding=1,
+                                                                 bias=self.use_bias,
+                                                                 dilation = 4 - abs(i-2))
 
-            elif self.dim_reduction_type == 'max_pooling':
-                self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
-                out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
+                out = self.layer_dict['conv_{}'.format(i)](out)  # use layer on inputs to get an output
+                out = F.relu(out)  # apply relu
+                print(out.shape)
 
-            elif self.dim_reduction_type == 'avg_pooling':
-                self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
-                out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
 
-            print(out.shape)
+
+            # if self.dim_reduction_type == 'strided_convolution':  # if dim reduction is strided conv, then add a strided conv
+            #     self.layer_dict['dim_reduction_strided_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+            #                                                                            kernel_size=3,
+            #                                                                            out_channels=out.shape[1],
+            #                                                                            padding=1,
+            #                                                                            bias=self.use_bias, stride=2,
+            #                                                                            dilation=1)
+            #
+            #     out = self.layer_dict['dim_reduction_strided_conv_{}'.format(i)](
+            #         out)  # use strided conv to get an output
+            #     out = F.relu(out)  # apply relu to the output
+            # elif self.dim_reduction_type == 'dilated_convolution':  # if dim reduction is dilated conv, then add a dilated conv, using an arbitrary dilation rate of i + 2 (so it gets smaller as we go, you can choose other dilation rates should you wish to do it.)
+            #     self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
+            #                                                                            kernel_size=3,
+            #                                                                            out_channels=out.shape[1],
+            #                                                                            padding=1,
+            #                                                                            bias=self.use_bias, stride=1,
+            #                                                                            dilation=i + 2)
+            #     out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](
+            #         out)  # run dilated conv on input to get output
+            #     out = F.relu(out)  # apply relu on output
+            #
+            # elif self.dim_reduction_type == 'max_pooling':
+            #     self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
+            #     out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
+            #
+            # elif self.dim_reduction_type == 'avg_pooling':
+            #     self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
+            #     out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+            #
+            # print(out.shape)
         if out.shape[-1] != 2:
             out = F.adaptive_avg_pool2d(out, 2)  # apply adaptive pooling to make sure output of conv layers is always (2, 2) spacially (helps with comparisons).
         print('shape before final linear layer', out.shape)
@@ -183,20 +209,20 @@ class ConvolutionalNetwork(nn.Module):
 
             out = self.layer_dict['conv_{}'.format(i)](out)  # pass through conv layer indexed at i
             out = F.relu(out)  # pass conv outputs through ReLU
-            if self.dim_reduction_type == 'strided_convolution':  # if strided convolution dim reduction then
-                out = self.layer_dict['dim_reduction_strided_conv_{}'.format(i)](
-                    out)  # pass previous outputs through a strided convolution indexed i
-                out = F.relu(out)  # pass strided conv outputs through ReLU
-
-            elif self.dim_reduction_type == 'dilated_convolution':
-                out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](out)
-                out = F.relu(out)
-
-            elif self.dim_reduction_type == 'max_pooling':
-                out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
-
-            elif self.dim_reduction_type == 'avg_pooling':
-                out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+            # if self.dim_reduction_type == 'strided_convolution':  # if strided convolution dim reduction then
+            #     out = self.layer_dict['dim_reduction_strided_conv_{}'.format(i)](
+            #         out)  # pass previous outputs through a strided convolution indexed i
+            #     out = F.relu(out)  # pass strided conv outputs through ReLU
+            #
+            # elif self.dim_reduction_type == 'dilated_convolution':
+            #     out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](out)
+            #     out = F.relu(out)
+            #
+            # elif self.dim_reduction_type == 'max_pooling':
+            #     out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
+            #
+            # elif self.dim_reduction_type == 'avg_pooling':
+            #     out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
 
         if out.shape[-1] != 2:
             out = F.adaptive_avg_pool2d(out, 2)
